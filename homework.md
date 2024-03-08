@@ -68,12 +68,56 @@ Bonus (no marks): Create an MV which can identify anomalies in the data. For exa
 but the max trip time is 10 minutes and 20 minutes respectively.
 
 Options:
-1. Yorkville East, Steinway
+1. Yorkville East, Steinway 👍
 2. Murray Hill, Midwood
 3. East Flatbush/Farragut, East Harlem North
 4. Midtown Center, University Heights/Morris Heights
 
 p.s. The trip time between taxi zones does not take symmetricity into account, i.e. `A -> B` and `B -> A` are considered different trips. This applies to subsequent questions as well.
+
+#### Solution
+
+Here's the query to create the materialized view that computes the average, min, and max trip time between each taxi zone pair:
+```sql
+CREATE MATERIALIZED VIEW trip_time_stats AS
+WITH trip_times AS (
+    SELECT 
+        tpep_pickup_datetime,
+        tpep_dropoff_datetime,
+        pulocationid AS pickup_location_id,
+        dolocationid AS dropoff_location_id,
+        EXTRACT(EPOCH FROM (tpep_dropoff_datetime - tpep_pickup_datetime)) AS trip_time
+    FROM trip_data
+)
+SELECT 
+    pickup_zone.zone AS pickup_zone,
+    dropoff_zone.zone AS dropoff_zone,
+    AVG(trip_time) AS avg_trip_time,
+    MIN(trip_time) AS min_trip_time,
+    MAX(trip_time) AS max_trip_time
+FROM trip_times
+JOIN taxi_zone AS pickup_zone ON trip_times.pickup_location_id = pickup_zone.location_id
+JOIN taxi_zone AS dropoff_zone ON trip_times.dropoff_location_id = dropoff_zone.location_id
+GROUP BY pickup_zone.zone, dropoff_zone.zone;
+```
+And here's the query to find the pair of taxi zones with the highest average trip time from the materialized view:
+```sql
+SELECT pickup_zone, dropoff_zone
+FROM trip_time_stats
+ORDER BY avg_trip_time DESC
+LIMIT 1;
+```
+For the bonus, creating a materialized view to identify anomalies would require a more complex analysis, depending on the specific criteria for what constitutes an anomaly. This could be based on various factors such as deviations from average values, standard deviations, or specific rules based on business logic or historical data. The following query shows a simple example based on the difference between average and maximum values:
+```sql
+CREATE MATERIALIZED VIEW anomaly_detection AS
+SELECT 
+    pickup_zone,
+    dropoff_zone,
+    avg_trip_time,
+    max_trip_time
+FROM trip_time_stats
+WHERE max_trip_time - avg_trip_time > 10;
+```
 
 ## Question 2
 
@@ -83,7 +127,42 @@ Options:
 1. 5
 2. 3
 3. 10
-4. 1
+4. 1 👍
+
+#### Solution
+
+Include the number of trips for the pair of taxi zones with the highest average trip time as follows:
+```sql
+CREATE MATERIALIZED VIEW trip_time_stats_count AS
+WITH trip_times AS (
+    SELECT 
+        tpep_pickup_datetime,
+        tpep_dropoff_datetime,
+        pulocationid AS pickup_location_id,
+        dolocationid AS dropoff_location_id,
+        EXTRACT(EPOCH FROM (tpep_dropoff_datetime - tpep_pickup_datetime)) AS trip_time
+    FROM trip_data
+)
+SELECT 
+    pickup_zone.zone AS pickup_zone,
+    dropoff_zone.zone AS dropoff_zone,
+    AVG(trip_time) AS avg_trip_time,
+    MIN(trip_time) AS min_trip_time,
+    MAX(trip_time) AS max_trip_time,
+    COUNT(*) AS num_trips
+FROM trip_times
+JOIN taxi_zone AS pickup_zone ON trip_times.pickup_location_id = pickup_zone.location_id
+JOIN taxi_zone AS dropoff_zone ON trip_times.dropoff_location_id = dropoff_zone.location_id
+GROUP BY pickup_zone.zone, dropoff_zone.zone;
+```
+
+Now, to find the pair of taxi zones with the highest average trip time along with the number of trips, use the following query:
+```sql
+SELECT pickup_zone, dropoff_zone, avg_trip_time, num_trips
+FROM trip_time_stats_count
+ORDER BY avg_trip_time DESC
+LIMIT 1;
+```
 
 ## Question 3
 
@@ -98,6 +177,19 @@ NOTE: For this question `17 hours` was picked to ensure we have enough data to w
 
 Options:
 1. Clinton East, Upper East Side North, Penn Station
-2. LaGuardia Airport, Lincoln Square East, JFK Airport
+2. LaGuardia Airport, Lincoln Square East, JFK Airport 👍
 3. Midtown Center, Upper East Side South, Upper East Side North
 4. LaGuardia Airport, Midtown Center, Upper East Side North
+
+To find the top 3 busiest zones in terms of the number of pickups from the latest pickup time to 17 hours before, you can use the following query:
+```sql
+SELECT 
+    taxi_zone.zone AS pickup_zone,
+    COUNT(*) AS num_pickups
+FROM trip_data
+JOIN taxi_zone ON trip_data.pulocationid = taxi_zone.location_id
+WHERE tpep_pickup_datetime >= (SELECT MAX(tpep_pickup_datetime) - INTERVAL '17 hours' FROM trip_data)
+GROUP BY pickup_zone
+ORDER BY num_pickups DESC
+LIMIT 3;
+```
