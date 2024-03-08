@@ -33,11 +33,7 @@
 
 
 # What is RisingWave?
-BILD 035
-BILD 036
-BILD 037
-PPT 11
-PPT 14
+RisingWave is an open-source distributed SQL streaming database, offering a straightforward, effective, and dependable approach to handle streaming data. Under the Apache 2.0 license, it empowers developers to manage stream processing akin to database operations. With the ability to articulate complex processing logic through materialized views, developers can access constantly updated and coherent results by querying these views.
 
 
 
