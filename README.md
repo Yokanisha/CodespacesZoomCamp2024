@@ -32,12 +32,8 @@
 </p>
 
 
-# What is RisingWave?
+## What is RisingWave?
 RisingWave is an open-source distributed SQL streaming database, offering a straightforward, effective, and dependable approach to handle streaming data. Under the Apache 2.0 license, it empowers developers to manage stream processing akin to database operations. With the ability to articulate complex processing logic through materialized views, developers can access constantly updated and coherent results by querying these views.
-
-![001](https://github.com/Yokanisha/CodespacesZoomCamp2024/blob/main/Image/001.jpg)
-
-![002](https://github.com/Yokanisha/CodespacesZoomCamp2024/blob/main/Image/002.jpg)
 
 Users can use RisingWave for:
 - Stream processing;
@@ -48,7 +44,21 @@ Users should not use RisingWave for：
 - Transaction processing;
 - Ad-hoc analytical queries that involve frequent full table scans.
 
-# Prerequisites
+![001](https://github.com/Yokanisha/CodespacesZoomCamp2024/blob/main/Image/001.jpg)
+
+## Why RisingWave for stream processing?
+RisingWave offers unparalleled benefits for stream processing with its focus on consistently updated materialized views and simplified development experience. By allowing developers to express complex processing logic through cascaded materialized views, RisingWave streamlines application development and eliminates the need for external storage solutions.
+
+Compared to existing stream processing systems like Apache Flink, Apache Spark Streaming, and ksqlDB, RisingWave excels in ease-of-use and cost efficiency. Its PostgreSQL-style SQL interface makes it easy to learn and integrate into existing infrastructures. Additionally, RisingWave's architecture, reminiscent of Snowflake's separation of storage and compute, ensures efficient and transparent scaling, along with rapid failure recovery.
+
+In essence, RisingWave offers a seamless and cost-effective solution for stream processing, empowering users to efficiently manage and query streaming data with ease.
+
+
+![002](https://github.com/Yokanisha/CodespacesZoomCamp2024/blob/main/Image/002.jpg)
+
+
+
+## Prerequisites
 
 - Docker and Docker Compose
 - Python 3.7 or later
